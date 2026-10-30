@@ -1,7 +1,7 @@
 'use strict';
 
-const CACHE = 'commute-music-shell-v1';
-const SHELL = ['./', './index.html', './app.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'commute-music-shell-v2';
+const SHELL = ['./', './index.html', './app.js', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon.svg', './icon-maskable-512.png'];
 const shellUrls = new Set(SHELL.map(path => new URL(path, self.registration.scope).href));
 
 self.addEventListener('install', event => {

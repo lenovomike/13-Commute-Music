@@ -6,14 +6,28 @@
   <meta name="theme-color" content="#16324f">
   <title>通勤离线音乐</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon-192.png" type="image/png">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
-    body { font: 16px system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; line-height: 1.6; }
-    button, input { font: inherit; padding: 6px; margin: 4px; } button { cursor: pointer; }
-    audio { width: 100%; } li { margin: 10px 0; overflow-wrap: anywhere; }
-    .current { font-weight: bold; } #status { white-space: pre-wrap; } input[type=url] { width: min(90%, 460px); }
-  </style>
+    * { box-sizing: border-box; }
+    body { font: 16px system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px 40px; line-height: 1.6; color: #16324f; background: #f5f8fa; }
+    section { background: white; padding: 16px; border-radius: 16px; margin: 20px 0; }
+    button, input, textarea, select { font: inherit; max-width: 100%; }
+    button { cursor: pointer; min-height: 44px; padding: 8px 12px; margin: 4px; border: 1px solid #ccd7df; border-radius: 9px; background: white; color: #16324f; }
+    button:disabled { opacity: .5; cursor: default; }
+    input, textarea, select { padding: 10px; border: 1px solid #ccd7df; border-radius: 8px; }
+    label, small { display: block; margin: 8px 0; }
+    textarea, select, #list-name { width: 100%; }
+    audio { width: 100%; } li { margin: 14px 0; overflow-wrap: anywhere; }
+    li > span { display: block; } summary { cursor: pointer; font-size: 14px; }
+    details select, details input { margin: 6px 0; width: 100%; }
+    .current { font-weight: bold; } #status { white-space: pre-wrap; }
+    .available { color: #17664a; } .missing { color: #96501a; }
+    small, #offline-status { color: #526574; font-size: 14px; }
+    [hidden] { display: none !important; }
+    #playlist { padding-left: 24px; } #playlist li { display: flex; align-items: center; gap: 4px; }
+    #playlist li button:first-child { flex: 1; text-align: left; overflow-wrap: anywhere; min-width: 0; }
+    </style>
   <script src="./app.js" defer></script>
 </head>
 <body>
@@ -21,12 +35,6 @@
   <p>音频保存在此设备的浏览器中。首次加载后，可离线打开并播放已导入的音乐。</p>
   <section aria-label="导入音乐">
     <label>导入本地音频 <input id="files" type="file" accept="audio/*" multiple disabled></label>
-    <form id="url-form">
-      <label for="url">音频 URL</label><br>
-      <input id="url" type="url" placeholder="https://example.com/music.mp3" required disabled>
-      <button id="add-url" disabled>下载并添加</button>
-    </form>
-    <p>URL 必须允许跨域下载（CORS）；下载完成后才能离线播放。</p>
   </section>
   <p id="status" role="status" aria-live="polite">正在打开音乐库…</p>
   <p id="offline-status" role="status"></p>
@@ -37,7 +45,31 @@
     <button id="toggle" disabled>播放 / 暂停</button>
     <button id="next" disabled>下一首</button>
   </div>
-  <h2>播放列表</h2>
+  <section aria-labelledby="list-heading">
+    <h2 id="list-heading">我的歌单</h2>
+    <form id="list-form">
+      <label for="list-name">歌单名称</label>
+      <input id="list-name" placeholder="例如：早班地铁" maxlength="100" disabled>
+      <label for="list-text">粘贴歌单（每行一首，可写“歌名 - 歌手”）</label>
+      <textarea id="list-text" rows="5" placeholder="晴天 - 周杰伦&#10;后来 - 刘若英" disabled></textarea>
+      <label for="list-file">或导入歌单文件（文本、M3U、CSV）</label>
+      <input id="list-file" type="file" accept=".txt,.m3u,.m3u8,.csv" disabled>
+      <small>CSV 支持“歌名,歌手”两列及表头；M3U 仅读取名称，不访问文件中的地址。粘贴内容与文件内容会合并。</small>
+      <button id="save-list" disabled>保存为新歌单</button>
+    </form>
+    <label for="list-select">播放范围</label>
+    <select id="list-select" disabled><option value="">本地音乐库</option></select>
+    <p id="list-summary" aria-live="polite"></p>
+    <div id="list-actions" hidden>
+      <button id="play-list">按顺序播放</button>
+      <button id="copy-missing">复制缺少列表</button>
+      <button id="delete-list">删除歌单</button>
+      <p>缺少音乐？使用顶部“导入本地音频”批量补充，或在条目中指定文件。名称不明确时请手动关联。</p>
+    </div>
+    <textarea id="copy-text" rows="5" aria-label="待复制的缺少列表" readonly hidden></textarea>
+    <ol id="list-items"></ol>
+  </section>
+  <h2>本地音乐库</h2>
   <p id="empty">尚无曲目，请导入音频。</p>
   <ol id="playlist"></ol>
 </body>
