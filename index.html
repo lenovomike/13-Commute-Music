@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#16324f">
+  <title>通勤离线音乐</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <style>
+    body { font: 16px system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px; line-height: 1.6; }
+    button, input { font: inherit; padding: 6px; margin: 4px; } button { cursor: pointer; }
+    audio { width: 100%; } li { margin: 10px 0; overflow-wrap: anywhere; }
+    .current { font-weight: bold; } #status { white-space: pre-wrap; } input[type=url] { width: min(90%, 460px); }
+  </style>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <h1>通勤离线音乐</h1>
+  <p>音频保存在此设备的浏览器中。首次加载后，可离线打开并播放已导入的音乐。</p>
+  <section aria-label="导入音乐">
+    <label>导入本地音频 <input id="files" type="file" accept="audio/*" multiple disabled></label>
+    <form id="url-form">
+      <label for="url">音频 URL</label><br>
+      <input id="url" type="url" placeholder="https://example.com/music.mp3" required disabled>
+      <button id="add-url" disabled>下载并添加</button>
+    </form>
+    <p>URL 必须允许跨域下载（CORS）；下载完成后才能离线播放。</p>
+  </section>
+  <p id="status" role="status" aria-live="polite">正在打开音乐库…</p>
+  <p id="offline-status" role="status"></p>
+  <h2 id="now-playing">尚未选择曲目</h2>
+  <audio id="audio" controls preload="metadata"></audio>
+  <div>
+    <button id="previous" disabled>上一首</button>
+    <button id="toggle" disabled>播放 / 暂停</button>
+    <button id="next" disabled>下一首</button>
+  </div>
+  <h2>播放列表</h2>
+  <p id="empty">尚无曲目，请导入音频。</p>
+  <ol id="playlist"></ol>
+</body>
+</html>
