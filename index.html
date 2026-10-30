@@ -11,6 +11,10 @@
   <style>
     * { box-sizing: border-box; }
     body { font: 16px system-ui, sans-serif; max-width: 760px; margin: 24px auto; padding: 0 16px 40px; line-height: 1.6; color: #16324f; background: #f5f8fa; }
+    .app-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .app-header h1 { font-size: clamp(22px, 6vw, 32px); }
+    .app-header button { flex-shrink: 0; min-width: 64px; }
+    #refresh-status { margin: 0; }
     section { background: white; padding: 16px; border-radius: 16px; margin: 20px 0; }
     button, input, textarea, select { font: inherit; max-width: 100%; }
     button { cursor: pointer; min-height: 44px; padding: 8px 12px; margin: 4px; border: 1px solid #ccd7df; border-radius: 9px; background: white; color: #16324f; }
@@ -31,7 +35,11 @@
   <script src="./app.js" defer></script>
 </head>
 <body>
-  <h1>通勤离线音乐</h1>
+  <header class="app-header">
+    <h1>通勤离线音乐</h1>
+    <button id="refresh" type="button" aria-describedby="refresh-status">刷新</button>
+  </header>
+  <p id="refresh-status" role="status" aria-live="polite"></p>
   <p>音频保存在此设备的浏览器中。首次加载后，可离线打开并播放已导入的音乐。</p>
   <section aria-label="导入音乐">
     <label>导入本地音频 <input id="files" type="file" accept="audio/*" multiple disabled></label>

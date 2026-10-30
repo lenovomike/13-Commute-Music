@@ -256,6 +256,59 @@ async function registerWorker() {
 }
 
 
+function waitForWorker(worker) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => finish(new Error('更新超时，请重试')), 20000);
+    const check = () => {
+      if (worker.state === 'activated') finish();
+      else if (worker.state === 'redundant') finish(new Error('更新未完成，请重试'));
+    };
+    function finish(error) {
+      clearTimeout(timer);
+      worker.removeEventListener('statechange', check);
+      if (error) reject(error); else resolve();
+    }
+    worker.addEventListener('statechange', check);
+    worker.postMessage({ type: 'SKIP_WAITING' });
+    check();
+  });
+}
+
+$('refresh').onclick = async () => {
+  const button = $('refresh');
+  button.disabled = true;
+  button.textContent = '刷新中…';
+  $('refresh-status').textContent = '正在检查并更新应用…';
+  try {
+    if ('serviceWorker' in navigator && window.isSecureContext) {
+      const registration = await navigator.serviceWorker.getRegistration()
+        || await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+      await registration.update();
+      const worker = registration.installing || registration.waiting || registration.active;
+      if (worker && worker.state !== 'activated') await waitForWorker(worker);
+      // The active worker fetches every shell asset bypassing the HTTP cache,
+      // including when the deployed sw.js itself has not changed.
+      await new Promise((resolve, reject) => {
+        const channel = new MessageChannel();
+        const timer = setTimeout(() => finish(new Error('刷新超时，请检查网络后重试')), 20000);
+        function finish(error) {
+          clearTimeout(timer);
+          channel.port1.close();
+          if (error) reject(error); else resolve();
+        }
+        channel.port1.onmessage = event => finish(event.data.ok ? null : new Error(event.data.error));
+        (registration.active || worker).postMessage({ type: 'REFRESH_SHELL' }, [channel.port2]);
+      });
+    }
+    location.reload();
+  } catch (error) {
+    $('refresh-status').textContent = `刷新失败：${error.message}。请联网后重试，本地音乐和歌单仍保留。`;
+    button.disabled = false;
+    button.textContent = '刷新';
+  }
+};
+
+
 let lists = [];
 let activeList = '';
 let queueCursor = -1;
